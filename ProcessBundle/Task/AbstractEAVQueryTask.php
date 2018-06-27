@@ -15,6 +15,7 @@ use CleverAge\ProcessBundle\Model\ProcessState;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Psr\Log\LoggerInterface;
 use Sidus\EAVModelBundle\Doctrine\EAVFinder;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -30,13 +31,18 @@ abstract class AbstractEAVQueryTask extends AbstractEAVTask
     protected $eavFinder;
 
     /**
+     * @param LoggerInterface        $logger
      * @param EntityManagerInterface $entityManager
      * @param FamilyRegistry         $familyRegistry
      * @param EAVFinder              $eavFinder
      */
-    public function __construct(EntityManagerInterface $entityManager, FamilyRegistry $familyRegistry, EAVFinder $eavFinder)
-    {
-        parent::__construct($entityManager, $familyRegistry);
+    public function __construct(
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager,
+        FamilyRegistry $familyRegistry,
+        EAVFinder $eavFinder
+    ) {
+        parent::__construct($logger, $entityManager, $familyRegistry);
         $this->eavFinder = $eavFinder;
     }
 

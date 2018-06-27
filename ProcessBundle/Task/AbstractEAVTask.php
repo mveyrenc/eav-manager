@@ -12,6 +12,7 @@ namespace CleverAge\EAVManager\ProcessBundle\Task;
 
 use CleverAge\ProcessBundle\Model\AbstractConfigurableTask;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Component\OptionsResolver\Options;
@@ -29,11 +30,16 @@ abstract class AbstractEAVTask extends AbstractConfigurableTask
     protected $familyRegistry;
 
     /**
+     * @param LoggerInterface        $logger
      * @param EntityManagerInterface $entityManager
      * @param FamilyRegistry         $familyRegistry
      */
-    public function __construct(EntityManagerInterface $entityManager, FamilyRegistry $familyRegistry)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager,
+        FamilyRegistry $familyRegistry
+    ) {
+        parent::__construct($logger);
         $this->entityManager = $entityManager;
         $this->familyRegistry = $familyRegistry;
     }

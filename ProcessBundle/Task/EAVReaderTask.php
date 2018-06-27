@@ -12,7 +12,6 @@ namespace CleverAge\EAVManager\ProcessBundle\Task;
 
 use CleverAge\ProcessBundle\Model\IterableTaskInterface;
 use CleverAge\ProcessBundle\Model\ProcessState;
-use Psr\Log\LogLevel;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -42,22 +41,14 @@ class EAVReaderTask extends AbstractEAVQueryTask implements IterableTaskInterfac
     {
         $options = $this->getOptions($state);
         if ($this->closed) {
+            $logContext = $state->getLogContext();
+            $logContext['options'] = $options;
             if ($options['allow_reset']) {
                 $this->closed = false;
                 $this->iterator = null;
-                $state->log(
-                    'Reader was closed previously, restarting it',
-                    LogLevel::WARNING,
-                    $options['family'],
-                    $options
-                );
+                $this->logger->error('Reader was closed previously, restarting it', $logContext);
             } else {
-                $state->log(
-                    'Reader was closed previously, stopping the process',
-                    LogLevel::ERROR,
-                    $options['family'],
-                    $options
-                );
+                $this->logger->error('Reader was closed previously, stopping the process', $logContext);
                 $state->setStopped(true);
 
                 return;
@@ -71,19 +62,18 @@ class EAVReaderTask extends AbstractEAVQueryTask implements IterableTaskInterfac
             // Log the data count
             if ($this->getOption($state, 'log_count')) {
                 $count = \count($paginator);
-                $state->log("{$count} items found with current query", LogLevel::INFO, $options['family'], $options);
+                $logContext = $state->getLogContext();
+                $logContext['options'] = $options;
+                $this->logger->info("{$count} items found with current query", $logContext);
             }
         }
 
         // Handle empty results
         if (0 === $this->iterator->count()) {
             if ($this->getOption($state, 'log_count')) {
-                $state->log(
-                    'Empty resultset for query, stopping the process',
-                    LogLevel::NOTICE,
-                    $options['family'],
-                    $options
-                );
+                $logContext = $state->getLogContext();
+                $logContext['options'] = $options;
+                $this->logger->notice('Empty resultset for query, stopping the process', $logContext);
             }
             $state->setStopped(true);
 
